@@ -1,0 +1,77 @@
+name: zordeer-runtime
+base: core24
+adopt-info: runtime-packages
+platforms:
+  amd64:
+    build-on: [amd64]
+    build-for: [amd64]
+summary: A Zordeer runtime
+description: |
+ A package containing some items necessary for the Zordeer to function.
+grade: stable
+confinement: strict
+compression: lzo
+
+slots:
+  zordeer-runtime:
+    interface: content
+    read:
+      - /
+
+parts:
+  runtime-packages:
+    plugin: nil
+    stage-packages:
+      - x11-xserver-utils
+      - libgstreamer1.0-0
+      - libgstreamer-gl1.0-0
+      - gstreamer1.0-plugins-base
+      - libgstreamer-plugins-base1.0-0
+      - gstreamer1.0-plugins-good
+      - libgstreamer-plugins-good1.0-0
+      - gstreamer1.0-plugins-bad
+      - libgstreamer-plugins-bad1.0-0
+      - gstreamer1.0-plugins-ugly
+      - gstreamer1.0-libav
+      - gstreamer1.0-vaapi
+      - gstreamer1.0-alsa
+      - gstreamer1.0-gl
+      - gstreamer1.0-x
+      - gstreamer1.0-plugins-rtp
+      - gstreamer1.0-tools
+      - libsdl2-2.0-0
+      - libdecor-0-0
+    override-build: |
+      craftctl default
+      craftctl set version=$(date +%Y-%m-%d)
+
+  cleanup:
+    after: [runtime-packages]
+    plugin: nil
+    build-snaps:
+      - mesa-2404
+      - kf6-core24
+    override-prime: |
+      set -eux
+      cd /snap/mesa-2404/current/usr/lib
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/lib/{} \;
+      cd /snap/mesa-2404/current/usr/share
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/share/{} \;
+
+      cd /snap/kf6-core24/current/usr/lib
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/lib/{} \;
+      cd /snap/kf6-core24/current/usr/share
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/share/{} \;
+
+  mangohud:
+    after: [cleanup]
+    plugin: dump
+    source: https://github.com/flightlessmango/MangoHud/releases/download/v0.8.4/MangoHud-0.8.4.r0.g992103e.tar.gz
+    override-build: |
+      craftctl default
+      tar -xvf MangoHud-package.tar -C $CRAFT_PART_INSTALL
+      sed -i 's|MANGOHUD_LIB_NAME="/usr/lib/mangohud/\\$LIB/libMangoHud_shim.so"|MANGOHUD_LIB_NAME="/usr/lib/mangohud/lib64/libMangoHud_shim.so"|' $CRAFT_PART_INSTALL/usr/bin/mangohud
+    prime:
+      - usr/bin
+      - usr/lib/mangohud/lib64
+      - usr/share
