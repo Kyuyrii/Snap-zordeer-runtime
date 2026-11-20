@@ -18,6 +18,11 @@ slots:
     read:
       - /
 
+lint:
+  ignore:
+    - library:
+        - usr/lib/mangohud/lib32/**
+
 parts:
   runtime-packages:
     plugin: nil
@@ -32,12 +37,10 @@ parts:
       - gstreamer1.0-plugins-ugly
       - gstreamer1.0-libav
       - gstreamer1.0-vaapi
-      - gstreamer1.0-alsa
       - gstreamer1.0-gl
-      - gstreamer1.0-x
-      - gstreamer1.0-plugins-rtp
-      - gstreamer1.0-tools
       - libsdl2-classic
+      - libsdl2-2.0-0
+      - libdecor-0-0
       - libsdl3-0
     override-build: |
       craftctl default
@@ -68,5 +71,5 @@ parts:
       sed -i 's|MANGOHUD_LIB_NAME="/usr/lib/mangohud/\\$LIB/libMangoHud_shim.so"|MANGOHUD_LIB_NAME="/usr/lib/mangohud/lib64/libMangoHud_shim.so"|' $CRAFT_PART_INSTALL/usr/bin/mangohud
     prime:
       - usr/bin
-      - usr/lib/mangohud/lib64
+      - usr/lib/mangohud
       - usr/share
